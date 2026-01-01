@@ -1,0 +1,110 @@
+[
+  {
+    "id": "sample-001",
+    "date": "2025-12-30",
+    "prefecture": "秋田県",
+    "city": "秋田市",
+    "location": "雄和地区",
+    "lat": 39.5833,
+    "lng": 140.1667,
+    "source": "https://example.com/news/1",
+    "summary": "住宅街近くでツキノワグマ1頭が目撃されました。",
+    "createdAt": "2025-12-30T09:00:00Z"
+  },
+  {
+    "id": "sample-002",
+    "date": "2025-12-29",
+    "prefecture": "岩手県",
+    "city": "盛岡市",
+    "location": "上田地区",
+    "lat": 39.7036,
+    "lng": 141.1527,
+    "source": "https://example.com/news/2",
+    "summary": "農作物被害の報告あり。クマの目撃情報多数。",
+    "createdAt": "2025-12-29T14:30:00Z"
+  },
+  {
+    "id": "sample-003",
+    "date": "2025-12-28",
+    "prefecture": "新潟県",
+    "city": "長岡市",
+    "location": "山古志地区",
+    "lat": 37.35,
+    "lng": 138.9,
+    "source": "https://example.com/news/3",
+    "summary": "登山道付近でクマの痕跡が発見されました。",
+    "createdAt": "2025-12-28T10:15:00Z"
+  },
+  {
+    "id": "sample-004",
+    "date": "2025-12-27",
+    "prefecture": "長野県",
+    "city": "松本市",
+    "location": "安曇地区",
+    "lat": 36.1583,
+    "lng": 137.5833,
+    "source": "https://example.com/news/4",
+    "summary": "早朝、畑でクマが目撃され、警察が注意を呼びかけています。",
+    "createdAt": "2025-12-27T07:00:00Z"
+  },
+  {
+    "id": "sample-005",
+    "date": "2025-12-26",
+    "prefecture": "北海道",
+    "city": "札幌市",
+    "location": "南区藤野",
+    "lat": 42.9667,
+    "lng": 141.2833,
+    "source": "https://example.com/news/5",
+    "summary": "ヒグマが住宅地に出没。猟友会が出動。",
+    "createdAt": "2025-12-26T16:45:00Z"
+  },
+  {
+    "id": "25814674c61c",
+    "date": "2025-12-31",
+    "prefecture": "静岡県",
+    "city": "掛川市",
+    "location": "線路脇",
+    "lat": 34.768814,
+    "lng": 137.998367,
+    "source": "https://news.google.com/rss/articles/CBMif0FVX3lxTE9ka2JJSmNTekpXR01mbkhZeXhiOWlnbENUQm5UVVhDaS0tY3ktOVAzbHdtVTdPUE8xbk95UWlmQXRza05naFNYMkE2N0R3NFBRVVVvazhiOEd2TDR4OEZVYmFvTGFNS2VSenhGaWppanJrX0JJejN0cjZYWjFSV0U?oc=5",
+    "summary": "線路脇でクマの死骸を発見、目撃情報との関連を調査中",
+    "createdAt": "2025-12-31T16:48:47.144094Z"
+  },
+  {
+    "id": "aade1cecf342",
+    "date": "2025-12-31",
+    "prefecture": "宮城県",
+    "city": "仙台市",
+    "location": "南中山",
+    "lat": 38.268162,
+    "lng": 140.869507,
+    "source": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1MY1N6WWluTVZPN1JocjF6X3FjdG5NQ2llNVFHVEdQN3J5YndVMlItbHRnazE2U201SG0xR1RzRHZrQVk2WTktMkl5Mk8xRk5saDJYRHBFTV80QXFMOTVweQ?oc=5",
+    "summary": "南中山で2頭の熊が目撃された",
+    "createdAt": "2025-12-31T16:48:47.276435Z"
+  },
+  {
+    "id": "1470ae258bc3",
+    "date": "2025-12-31",
+    "prefecture": "栃木県",
+    "city": "矢板市",
+    "location": "",
+    "lat": 36.806667,
+    "lng": 139.924179,
+    "source": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE42LVY2c3ZleUhTZkVfQUdyc1lxY2dDSGJLQUFBb2dOaHI1SWt1Q3BySXlBMkw0WDQ1RVVocUVHTXBvblJJeEVsRFl2bjhVbDdHV2dDRmc4Z09OOG8?oc=5",
+    "summary": "矢板市でクマ1頭が目撃された",
+    "createdAt": "2025-12-31T16:48:47.400001Z"
+  },
+  {
+    "id": "94b94c0c7a94",
+    "date": "2025-12-31",
+    "prefecture": "宮城県",
+    "city": "仙台市泉区",
+    "location": "公園",
+    "lat": 38.326344,
+    "lng": 140.881287,
+    "source": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5NOGhmT1Fzcm9HSkZBMnVQbk1kYjFDRnlPcTFndDM3NmdXTGFuUVBrNzRXLU9Gd2lJTHNTVXN6M3BuUjhyZTZ1TnFUOHFQQUJhQmRFbzllTElSczdQbzJJQw?oc=5",
+    "summary": "仙台市泉区の公園で熊が目撃された",
+    "createdAt": "2025-12-31T16:48:47.529538Z"
+  }
+]

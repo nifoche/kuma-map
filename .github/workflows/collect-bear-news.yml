@@ -1,9 +1,11 @@
-name: 🐻 熊出没ニュース収集
+name: 🐻 熊出没データ収集
 
 on:
   schedule:
-    # 毎日3:00 JST (18:00 UTC前日)
-    - cron: '0 18 * * *'
+    # 毎日6:00 JST (21:00 UTC前日)
+    - cron: '0 21 * * *'
+    # 毎日18:00 JST (9:00 UTC)
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
@@ -23,7 +25,15 @@ jobs:
         run: |
           pip install requests anthropic supabase
 
-      - name: Run collector
+      - name: Collect official data (秋田県オープンデータ)
+        env:
+          SLACK_WEBHOOK_URL_TANALABO: ${{ secrets.SLACK_WEBHOOK_URL_TANALABO }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_KUMADATA }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY_KUMADATA }}
+        run: |
+          python scripts/collect_official.py
+
+      - name: Collect news (Google News RSS)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SLACK_WEBHOOK_URL_TANALABO: ${{ secrets.SLACK_WEBHOOK_URL_TANALABO }}

@@ -73,12 +73,22 @@ async function getPrefectureFromCoords(lat: number, lng: number): Promise<string
   }
 }
 
+// 過去6ヶ月の日付を計算
+function getSixMonthsAgo(): Date {
+  const date = new Date();
+  date.setMonth(date.getMonth() - 6);
+  return date;
+}
+
 export default function SightingsView({ sightings }: SightingsViewProps) {
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
+  const [showAllPeriod, setShowAllPeriod] = useState<boolean>(false);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [detectedPrefecture, setDetectedPrefecture] = useState<string | null>(null);
+
+  const sixMonthsAgo = useMemo(() => getSixMonthsAgo(), []);
 
   const handleRegionChange = (region: string) => {
     setSelectedRegion(region);
@@ -171,6 +181,11 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
   const filteredSightings = useMemo(() => {
     let filtered = sightings;
 
+    // 期間フィルター（デフォルト: 過去6ヶ月）
+    if (!showAllPeriod) {
+      filtered = filtered.filter(s => new Date(s.date) >= sixMonthsAgo);
+    }
+
     if (selectedRegion !== 'all') {
       const regionPrefs = REGIONS[selectedRegion] || [];
       filtered = filtered.filter(s => regionPrefs.includes(s.prefecture));
@@ -181,7 +196,7 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     }
 
     return filtered;
-  }, [sightings, selectedRegion, selectedPrefecture]);
+  }, [sightings, selectedRegion, selectedPrefecture, showAllPeriod, sixMonthsAgo]);
 
   const recentSightings = filteredSightings.slice(0, 10);
 
@@ -214,6 +229,21 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
                   ? new Date(sightings[0].date).toLocaleDateString('ja-JP')
                   : '-'}
               </span>
+            </div>
+            <div className="pt-2 border-t">
+              <Button
+                variant={showAllPeriod ? 'default' : 'outline'}
+                size="sm"
+                className="w-full text-xs h-7"
+                onClick={() => setShowAllPeriod(!showAllPeriod)}
+              >
+                {showAllPeriod ? '全期間表示中' : '過去6ヶ月表示中'}
+              </Button>
+              {!showAllPeriod && (
+                <p className="text-xs text-muted-foreground mt-1 text-center">
+                  クリックで全期間表示
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

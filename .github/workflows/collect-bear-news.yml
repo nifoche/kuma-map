@@ -41,3 +41,11 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY_KUMADATA }}
         run: |
           python scripts/collect_news.py
+
+      - name: Collect kumamap.com data
+        env:
+          SLACK_WEBHOOK_URL_TANALABO: ${{ secrets.SLACK_WEBHOOK_URL_TANALABO }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_KUMADATA }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY_KUMADATA }}
+        run: |
+          python scripts/collect_kumamap.py

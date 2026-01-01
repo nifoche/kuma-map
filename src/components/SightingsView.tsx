@@ -354,7 +354,7 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <BearMapWrapper sightings={filteredSightings} />
+          <BearMapWrapper sightings={filteredSightings} selectedRegion={selectedRegion} />
         </CardContent>
       </Card>
 

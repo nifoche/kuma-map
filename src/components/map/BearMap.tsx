@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { BearSighting } from '@/types';
@@ -16,11 +16,37 @@ const bearIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-interface BearMapProps {
-  sightings: BearSighting[];
+// エリアごとの中心座標とズームレベル
+const REGION_VIEWS: Record<string, { center: [number, number]; zoom: number }> = {
+  'all': { center: [36.5, 138.0], zoom: 5 },
+  '北海道': { center: [43.5, 143.0], zoom: 7 },
+  '東北': { center: [39.5, 140.5], zoom: 7 },
+  '関東': { center: [36.0, 139.5], zoom: 8 },
+  '中部': { center: [36.0, 137.5], zoom: 7 },
+  '関西': { center: [34.8, 135.5], zoom: 8 },
+  '中国': { center: [34.8, 133.0], zoom: 8 },
+  '四国': { center: [33.8, 133.5], zoom: 8 },
+  '九州・沖縄': { center: [32.5, 131.0], zoom: 7 },
+};
+
+// 地図の表示範囲を変更するコンポーネント
+function MapController({ region }: { region: string }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const view = REGION_VIEWS[region] || REGION_VIEWS['all'];
+    map.flyTo(view.center, view.zoom, { duration: 0.8 });
+  }, [map, region]);
+
+  return null;
 }
 
-export default function BearMap({ sightings }: BearMapProps) {
+interface BearMapProps {
+  sightings: BearSighting[];
+  selectedRegion?: string;
+}
+
+export default function BearMap({ sightings, selectedRegion = 'all' }: BearMapProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,16 +61,17 @@ export default function BearMap({ sightings }: BearMapProps) {
     );
   }
 
-  // 日本の中心付近
-  const center: [number, number] = [36.5, 138.0];
+  // 初期表示位置
+  const initialView = REGION_VIEWS[selectedRegion] || REGION_VIEWS['all'];
 
   return (
     <MapContainer
-      center={center}
-      zoom={5}
+      center={initialView.center}
+      zoom={initialView.zoom}
       style={{ height: '600px', width: '100%' }}
       className="rounded-lg z-0"
     >
+      <MapController region={selectedRegion} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

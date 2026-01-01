@@ -14,8 +14,9 @@ const BearMap = dynamic(() => import('./BearMap'), {
 
 interface BearMapWrapperProps {
   sightings: BearSighting[];
+  selectedRegion?: string;
 }
 
-export default function BearMapWrapper({ sightings }: BearMapWrapperProps) {
-  return <BearMap sightings={sightings} />;
+export default function BearMapWrapper({ sightings, selectedRegion = 'all' }: BearMapWrapperProps) {
+  return <BearMap sightings={sightings} selectedRegion={selectedRegion} />;
 }

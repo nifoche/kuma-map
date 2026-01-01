@@ -73,10 +73,10 @@ async function getPrefectureFromCoords(lat: number, lng: number): Promise<string
   }
 }
 
-// 過去6ヶ月の日付を計算
-function getSixMonthsAgo(): Date {
+// 過去1ヶ月の日付を計算
+function getOneMonthAgo(): Date {
   const date = new Date();
-  date.setMonth(date.getMonth() - 6);
+  date.setMonth(date.getMonth() - 1);
   return date;
 }
 
@@ -88,7 +88,7 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [detectedPrefecture, setDetectedPrefecture] = useState<string | null>(null);
 
-  const sixMonthsAgo = useMemo(() => getSixMonthsAgo(), []);
+  const oneMonthAgo = useMemo(() => getOneMonthAgo(), []);
 
   const handleRegionChange = (region: string) => {
     setSelectedRegion(region);
@@ -181,9 +181,9 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
   const filteredSightings = useMemo(() => {
     let filtered = sightings;
 
-    // 期間フィルター（デフォルト: 過去6ヶ月）
+    // 期間フィルター（デフォルト: 過去1ヶ月）
     if (!showAllPeriod) {
-      filtered = filtered.filter(s => new Date(s.date) >= sixMonthsAgo);
+      filtered = filtered.filter(s => new Date(s.date) >= oneMonthAgo);
     }
 
     if (selectedRegion !== 'all') {
@@ -196,7 +196,7 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     }
 
     return filtered;
-  }, [sightings, selectedRegion, selectedPrefecture, showAllPeriod, sixMonthsAgo]);
+  }, [sightings, selectedRegion, selectedPrefecture, showAllPeriod, oneMonthAgo]);
 
   const recentSightings = filteredSightings.slice(0, 10);
 
@@ -237,7 +237,7 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
                 className="w-full text-xs h-7"
                 onClick={() => setShowAllPeriod(!showAllPeriod)}
               >
-                {showAllPeriod ? '全期間表示中' : '過去6ヶ月表示中'}
+                {showAllPeriod ? '全期間表示中' : '直近1ヶ月表示中'}
               </Button>
               {!showAllPeriod && (
                 <p className="text-xs text-muted-foreground mt-1 text-center">

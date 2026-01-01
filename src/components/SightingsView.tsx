@@ -50,7 +50,6 @@ async function getPrefectureFromCoords(lat: number, lng: number): Promise<string
     const data = await response.json();
 
     if (data.results && data.results.mupicode) {
-      // mupicode: 都道府県コード(2桁) + 市区町村コード(3桁)
       const prefCode = data.results.mupicode.substring(0, 2);
       const prefectures: Record<string, string> = {
         '01': '北海道', '02': '青森県', '03': '岩手県', '04': '宮城県',
@@ -81,13 +80,11 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [detectedPrefecture, setDetectedPrefecture] = useState<string | null>(null);
 
-  // エリア変更時に都道府県をリセット
   const handleRegionChange = (region: string) => {
     setSelectedRegion(region);
     setSelectedPrefecture('all');
   };
 
-  // 現在地から都道府県を検出
   const detectLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       setLocationError('位置情報に対応していません');
@@ -105,12 +102,10 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
         if (pref) {
           setDetectedPrefecture(pref);
           const region = getRegionFromPrefecture(pref);
-          // データに存在する都道府県なら自動選択
           if (sightings.some(s => s.prefecture === pref)) {
             if (region) setSelectedRegion(region);
             setSelectedPrefecture(pref);
           } else if (region) {
-            // 都道府県にデータがなくてもエリアは設定
             setSelectedRegion(region);
           }
         } else {
@@ -138,12 +133,10 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     );
   }, [sightings]);
 
-  // 初回ロード時に現在地を取得
   useEffect(() => {
     detectLocation();
   }, [detectLocation]);
 
-  // エリア別件数を取得
   const regionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const region of Object.keys(REGIONS)) {
@@ -154,7 +147,6 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     return counts;
   }, [sightings]);
 
-  // 都道府県リストを取得（件数付き）
   const prefectureCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     sightings.forEach((s) => {
@@ -163,32 +155,27 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     return counts;
   }, [sightings]);
 
-  // 選択エリア内の都道府県リスト
   const prefectures = useMemo(() => {
     let prefs = Object.entries(prefectureCounts);
 
-    // エリアでフィルタリング
     if (selectedRegion !== 'all') {
       const regionPrefs = REGIONS[selectedRegion] || [];
       prefs = prefs.filter(([name]) => regionPrefs.includes(name));
     }
 
     return prefs
-      .sort((a, b) => b[1] - a[1]) // 件数順
+      .sort((a, b) => b[1] - a[1])
       .map(([name]) => name);
   }, [prefectureCounts, selectedRegion]);
 
-  // フィルター適用
   const filteredSightings = useMemo(() => {
     let filtered = sightings;
 
-    // エリアフィルター
     if (selectedRegion !== 'all') {
       const regionPrefs = REGIONS[selectedRegion] || [];
       filtered = filtered.filter(s => regionPrefs.includes(s.prefecture));
     }
 
-    // 都道府県フィルター
     if (selectedPrefecture !== 'all') {
       filtered = filtered.filter(s => s.prefecture === selectedPrefecture);
     }
@@ -196,212 +183,183 @@ export default function SightingsView({ sightings }: SightingsViewProps) {
     return filtered;
   }, [sightings, selectedRegion, selectedPrefecture]);
 
-  // 最新5件
-  const recentSightings = filteredSightings.slice(0, 5);
+  const recentSightings = filteredSightings.slice(0, 10);
 
   return (
-    <div className="space-y-6">
-      {/* 統計カード */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="flex gap-4 h-[calc(100vh-120px)]">
+      {/* 左サイド: 統計 + エリア選択 */}
+      <div className="w-64 flex-shrink-0 space-y-4 overflow-y-auto">
+        {/* 統計 */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              総出没件数
-            </CardTitle>
+            <CardTitle className="text-sm">統計情報</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{sightings.length}</p>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">総出没件数</span>
+              <span className="text-xl font-bold">{sightings.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">表示中</span>
+              <span className="text-xl font-bold">{filteredSightings.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">都道府県数</span>
+              <span className="text-xl font-bold">{Object.keys(prefectureCounts).length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">最終更新</span>
+              <span className="text-sm font-medium">
+                {sightings.length > 0
+                  ? new Date(sightings[0].date).toLocaleDateString('ja-JP')
+                  : '-'}
+              </span>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              表示中
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{filteredSightings.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              都道府県数
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{prefectures.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              最終更新
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">
-              {sightings.length > 0
-                ? new Date(sightings[0].date).toLocaleDateString('ja-JP')
-                : '-'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* フィルター */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <span>🔍</span>
-            エリア・都道府県で絞り込み
-            {detectedPrefecture && (
-              <Badge variant="outline" className="ml-2 font-normal">
-                <MapPin className="w-3 h-3 mr-1" />
-                現在地: {detectedPrefecture}
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* エリア選択（クリック式） */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedRegion === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleRegionChange('all')}
-            >
-              全国 ({sightings.length})
-            </Button>
-            {Object.keys(REGIONS).map((region) => (
+        {/* エリア選択 */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              エリア選択
+              {detectedPrefecture && (
+                <Badge variant="outline" className="text-xs font-normal">
+                  <MapPin className="w-3 h-3 mr-1" />
+                  {detectedPrefecture}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex flex-wrap gap-1">
               <Button
-                key={region}
-                variant={selectedRegion === region ? 'default' : 'outline'}
+                variant={selectedRegion === 'all' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handleRegionChange(region)}
-                disabled={regionCounts[region] === 0}
+                className="text-xs h-7"
+                onClick={() => handleRegionChange('all')}
               >
-                {region} ({regionCounts[region]})
+                全国
               </Button>
-            ))}
-          </div>
+              {Object.keys(REGIONS).map((region) => (
+                <Button
+                  key={region}
+                  variant={selectedRegion === region ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => handleRegionChange(region)}
+                  disabled={regionCounts[region] === 0}
+                >
+                  {region}
+                </Button>
+              ))}
+            </div>
 
-          <div className="flex flex-col md:flex-row gap-3">
-            {/* 都道府県選択 */}
             <Select value={selectedPrefecture} onValueChange={setSelectedPrefecture}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full h-8 text-sm">
                 <SelectValue placeholder="都道府県を選択" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
                   {selectedRegion === 'all' ? 'すべて' : `${selectedRegion}全体`}
-                  {' '}({selectedRegion === 'all' ? sightings.length : regionCounts[selectedRegion]}件)
                 </SelectItem>
                 {prefectures.map((pref) => (
                   <SelectItem key={pref} value={pref}>
-                    {pref} ({prefectureCounts[pref]}件)
-                    {pref === detectedPrefecture && ' - 現在地'}
+                    {pref} ({prefectureCounts[pref]})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            {/* 現在地ボタン */}
             <Button
               variant="outline"
               size="sm"
               onClick={detectLocation}
               disabled={isLocating}
-              className="w-full md:w-auto"
+              className="w-full h-8 text-xs"
             >
               {isLocating ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                   取得中...
                 </>
               ) : (
                 <>
-                  <MapPin className="w-4 h-4 mr-2" />
+                  <MapPin className="w-3 h-3 mr-1" />
                   現在地を取得
                 </>
               )}
             </Button>
-          </div>
-          {locationError && (
-            <p className="text-sm text-destructive mt-2">{locationError}</p>
-          )}
-          {detectedPrefecture && !sightings.some(s => s.prefecture === detectedPrefecture) && (
-            <p className="text-sm text-muted-foreground mt-2">
-              {detectedPrefecture}の出没データはありません
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* 地図 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span>🗺️</span>
-            出没マップ
-            {(selectedRegion !== 'all' || selectedPrefecture !== 'all') && (
-              <Badge variant="secondary" className="ml-2">
-                {selectedPrefecture !== 'all'
-                  ? selectedPrefecture
-                  : selectedRegion}
-              </Badge>
+            {locationError && (
+              <p className="text-xs text-destructive">{locationError}</p>
             )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BearMapWrapper sightings={filteredSightings} selectedRegion={selectedRegion} />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* 最近の出没情報 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span>📋</span>
-            {selectedPrefecture !== 'all'
-              ? `${selectedPrefecture}の出没情報`
-              : selectedRegion !== 'all'
-                ? `${selectedRegion}の出没情報`
-                : '最近の出没情報'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentSightings.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
-                出没情報はありません
-              </p>
-            ) : (
-              recentSightings.map((sighting) => (
-                <div
-                  key={sighting.id}
-                  className="border-b pb-4 last:border-b-0 last:pb-0"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="secondary">{sighting.prefecture}</Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {sighting.city} {sighting.location}
-                        </span>
-                      </div>
-                      <p className="text-sm">{sighting.summary}</p>
+      {/* 中央: 地図 */}
+      <div className="flex-1 min-w-0">
+        <Card className="h-full">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              出没マップ
+              {(selectedRegion !== 'all' || selectedPrefecture !== 'all') && (
+                <Badge variant="secondary" className="text-xs">
+                  {selectedPrefecture !== 'all'
+                    ? selectedPrefecture
+                    : selectedRegion}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-60px)]">
+            <BearMapWrapper sightings={filteredSightings} selectedRegion={selectedRegion} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 右サイド: 出没情報 */}
+      <div className="w-80 flex-shrink-0">
+        <Card className="h-full">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              {selectedPrefecture !== 'all'
+                ? `${selectedPrefecture}の出没情報`
+                : selectedRegion !== 'all'
+                  ? `${selectedRegion}の出没情報`
+                  : '最近の出没情報'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-y-auto h-[calc(100%-60px)]">
+            <div className="space-y-3">
+              {recentSightings.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4 text-sm">
+                  出没情報はありません
+                </p>
+              ) : (
+                recentSightings.map((sighting) => (
+                  <div
+                    key={sighting.id}
+                    className="border-b pb-3 last:border-b-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">{sighting.prefecture}</Badge>
+                      <time className="text-xs text-muted-foreground">
+                        {new Date(sighting.date).toLocaleDateString('ja-JP')}
+                      </time>
                     </div>
-                    <time className="text-sm text-muted-foreground whitespace-nowrap">
-                      {new Date(sighting.date).toLocaleDateString('ja-JP')}
-                    </time>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {sighting.city} {sighting.location}
+                    </p>
+                    <p className="text-sm">{sighting.summary}</p>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

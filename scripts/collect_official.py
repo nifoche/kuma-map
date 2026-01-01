@@ -56,32 +56,31 @@ def fetch_akita_data() -> list[dict]:
         response = requests.get(AKITA_CSV_URL, timeout=60)
         response.raise_for_status()
 
-        # Shift-JISでデコード（日本の公的データによくある）
-        try:
-            content = response.content.decode('shift_jis')
-        except UnicodeDecodeError:
-            content = response.content.decode('utf-8')
+        # UTF-8でデコード
+        content = response.content.decode('utf-8')
 
         reader = csv.DictReader(io.StringIO(content))
         sightings = []
 
         for row in reader:
             # クマのデータのみ抽出
-            animal = row.get('獣種', row.get('animal_type', ''))
+            animal = row.get('獣種', '')
             if 'クマ' not in animal and '熊' not in animal and 'ツキノワグマ' not in animal:
                 continue
 
-            # 日付を取得
-            date_str = row.get('発見日', row.get('date', ''))
+            # 日付を取得（目撃日時: 2025/11/30 23:13 形式）
+            date_str = row.get('目撃日時', '')
             if not date_str:
                 continue
 
             # 日付フォーマットを正規化
             try:
-                if '/' in date_str:
-                    date_obj = datetime.strptime(date_str, '%Y/%m/%d')
-                elif '-' in date_str:
-                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                # 日時から日付部分のみ抽出
+                date_part = date_str.split(' ')[0]
+                if '/' in date_part:
+                    date_obj = datetime.strptime(date_part, '%Y/%m/%d')
+                elif '-' in date_part:
+                    date_obj = datetime.strptime(date_part, '%Y-%m-%d')
                 else:
                     continue
                 date_formatted = date_obj.strftime('%Y-%m-%d')
@@ -92,9 +91,9 @@ def fetch_akita_data() -> list[dict]:
             if date_obj.year < 2024:
                 continue
 
-            # 座標を取得
-            lat = row.get('緯度', row.get('latitude', ''))
-            lng = row.get('経度', row.get('longitude', ''))
+            # 座標を取得（x(緯度), y(経度)）
+            lat = row.get('x(緯度)', '')
+            lng = row.get('y(経度)', '')
 
             if not lat or not lng:
                 continue
@@ -106,9 +105,10 @@ def fetch_akita_data() -> list[dict]:
                 continue
 
             # 市区町村を取得
-            city = row.get('市町村', row.get('municipality', ''))
-            location = row.get('地区', row.get('location', ''))
-            summary = row.get('状況', row.get('situation', ''))[:100] if row.get('状況', row.get('situation', '')) else 'クマ目撃情報'
+            city = row.get('市町村', '')
+            location = row.get('地番情報', '')
+            situation = row.get('目撃時の状況', '')
+            summary = situation[:100] if situation else 'クマ目撃情報'
 
             sighting = {
                 'prefecture': '秋田県',
@@ -127,6 +127,8 @@ def fetch_akita_data() -> list[dict]:
 
     except Exception as e:
         print(f"秋田県データ取得エラー: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 
